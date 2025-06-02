@@ -1,0 +1,97 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: fc6e4037754776a46a18df8e0b787308
+  m_SerializeEntries:
+  - m_GUID: 135b3d610536bd84e8c627d408164728
+    m_Address: Assets/Address_Obj/dice-face.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Block
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6ae830109aae91b4b95d785c1c0ba287
+    m_Address: Assets/SO/Blocks/1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Block
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4b1b353ea8c423249b0b5761a1a79827
+    m_Address: Assets/SO/Blocks/2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Block
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 117734ce3335aaf4b99233f0828d64a6
+    m_Address: Assets/SO/Blocks/3.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Block
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65fd5628aab8e7e47944460bc9a6f698
+    m_Address: Assets/SO/Blocks/4.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Block
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2b83e9140cd34364bbd5126977748e15
+    m_Address: Assets/SO/Blocks/5.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Block
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c6085ea41fc0bf4bbb140f7c51fd65c
+    m_Address: Assets/SO/Blocks/6.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Block
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 70b144c38cd92b2498f6e4a02689c125
+    m_Address: Assets/SO/Cell Data.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Cell
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 102dcfe3f082f1d4a860d22f31da3678
+    m_Address: Assets/SO/Stages/1Stage.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Stage
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d7110e72c1cd3664a833a943a926df35
+    m_Address: Assets/SO/Stages/2Stage.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Stage
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 805bba923d7d05e4fbac1ecf6b96bdff
+    m_Address: Assets/SO/Stages/3Stage.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Stage
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 34ee13354bf89bd4ab9a54eb273c4a0a
+    m_Address: Assets/Prefabs/Cell_Sprite.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Cell
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 16f49b7bf7de58340a30ad6a0cc97eab, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: c5a42cdeec9119d468ac050400c508cc, type: 2}
+    - {fileID: 11400000, guid: 22588ab9deed38a4a8b19ff389f59c7b, type: 2}
