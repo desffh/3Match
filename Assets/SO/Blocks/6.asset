@@ -15,3 +15,4 @@ MonoBehaviour:
   blockType: 1
   num: 6
   sprite: {fileID: 21300000, guid: f609d4a8720b9b04888446cf7e8462ff, type: 3}
+  color: {r: 1, g: 1, b: 1, a: 1}

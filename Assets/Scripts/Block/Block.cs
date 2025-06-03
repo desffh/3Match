@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+// 블록 데이터
 public class Block : MonoBehaviour
 {
     [SerializeField] int num;
@@ -14,21 +15,26 @@ public class Block : MonoBehaviour
     public int Num {  get { return num; } }
     public BlockType blockType { get; private set; }
     public SpriteRenderer spriteRenderer { get; private set; }
+    public BlockAnime Anime { get; private set; }
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+
+        Anime = GetComponent<BlockAnime>();
     }
 
     // 타일 데이터 주입
     // -> 블럭 동적 생성 시 호출 (Instantiate는 외부에서, 초기화만 여기서)
-    public void Init(BlockData tiledata)
+    public void Init(BlockData data)
     {
-        num = tiledata.Num;
+        num = data.Num;
 
-        blockType = tiledata.Blocktype;
+        blockType = data.Blocktype;
 
-        spriteRenderer.sprite = tiledata.Sprite;
+        spriteRenderer.sprite = data.Sprite;
+
+        spriteRenderer.color = data.Color;
     }
 
     // 보드에서 가져온 좌표 지정
@@ -37,5 +43,16 @@ public class Block : MonoBehaviour
         boardPos = new Vector2Int(x, y);
     }
 
-    // 블록 타입 변경 (추후 등록 예정)
+    // 블록 데이터 등록
+    public void  blockdataSet(int num, BlockType type, Sprite sprite, Color color)
+    {
+        this.num = num;
+
+        blockType = type;
+
+        spriteRenderer.sprite = sprite;
+
+        spriteRenderer.color = color;
+    }
+
 }

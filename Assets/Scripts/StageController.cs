@@ -4,61 +4,24 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
+// 스테이지 선택 & 구성
 public class StageController : MonoBehaviour
 {
-    [Header("참조")]
     [SerializeField] private Stage stage;
 
-    [Header("Addressable StageData 리스트")]
-    [SerializeField] private AssetReferenceT<StageData>[] stageDataReferences;
+    [SerializeField] private int stageNum;
 
-    private AsyncOperationHandle<StageData>? currentHandle;
+    // 어드레서블 변경
+    [SerializeField] private List<StageData> stageData = new List<StageData>();
 
-    public void LoadRandomStage()
+    private void Start()
     {
-        if (stageDataReferences == null || stageDataReferences.Length == 0)
-        {
-            Debug.LogError("StageData 리스트가 비어 있습니다!");
-            return;
-        }
-
-        int randomIndex = Random.Range(0, stageDataReferences.Length);
-        var selectedRef = stageDataReferences[randomIndex];
-
-        // 이전 로드 해제
-        if (currentHandle.HasValue && currentHandle.Value.IsValid())
-        {
-            Addressables.Release(currentHandle.Value);
-        }
-
-        currentHandle = selectedRef.LoadAssetAsync();
-        currentHandle.Value.Completed += handle =>
-        {
-            if (handle.Status == AsyncOperationStatus.Succeeded)
-            {
-                // 스테이지 호출 & 보드 세팅
-                stage.Init(handle.Result);
-                stage.SetupBoard();
-                Debug.Log("스테이지 세팅 완료");
-            }
-            else
-            {
-                Debug.LogError("StageData 로드 실패");
-            }
-        };
+        LoadStage();
     }
 
-    private void OnDestroy()
+    public void LoadStage()
     {
-        if (currentHandle.HasValue && currentHandle.Value.IsValid())
-        {
-            Addressables.Release(currentHandle.Value);
-        }
+        stage.Init(stageData[stageNum]); // 스테이지 정보 지정
+        stage.SetupBoard(); // 스테이지 보드 구성
     }
-
-    public void OnRandomStageButtonClick()
-    {
-        LoadRandomStage();
-    }
-
 }
