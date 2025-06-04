@@ -20,6 +20,5 @@ public class BlockData : ScriptableObject
     public BlockType Blocktype => blockType;
     public int Num => num;
     public Sprite Sprite => sprite;
-
     public Color Color => color;
 }

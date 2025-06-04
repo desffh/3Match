@@ -34,7 +34,7 @@ public class BlockCreater : MonoBehaviour
         obj.transform.localScale = scale;
 
         Block block = obj.GetComponent<Block>();
-        block.SetBoardPos(boardPos.x, boardPos.y); // ÁÂÇ¥ ÁÖÀÔ
+        block.SetBoardPos(boardPos.x, boardPos.y); // ÁÂÇ¥ ÁÖÀÔ (ÇàX, ¿­Y)
         block.Init(data); // ·£´ý µ¥ÀÌÅÍ ÀúÀå
 
         return block;

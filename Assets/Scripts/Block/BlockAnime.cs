@@ -10,17 +10,18 @@ using UnityEngine.UIElements;
 
 public class BlockAnime : MonoBehaviour
 {
+    // 마우스 입력 스왑 애니메이션
     public Tween MoveTo(Vector3 worldPos)
     {
-        return transform.DOMove(worldPos, 0.3f).SetEase(Ease.OutQuart);
+        return transform.DOMove(worldPos, 0.2f).SetEase(Ease.OutQuart);
     }
 
-    // 2048 스타일: 특정 위치로 이동 후 사라지기
+    // 매치 시 머지 애니메이션 
     public void MergeToAndPop(Vector3 targetPos, Vector3 blockScale, System.Action onComplete = null)
     {
         Sequence seq = DOTween.Sequence();
-        seq.Append(transform.DOMove(targetPos, 0.3f).SetEase(Ease.InOutQuad));
-        seq.Join(transform.DOScale(blockScale, 0.3f).SetEase(Ease.InBack));
+        seq.Append(transform.DOMove(targetPos, 0.25f).SetEase(Ease.InOutQuad));
+        seq.Join(transform.DOScale(blockScale, 0.2f).SetEase(Ease.InBack));
         seq.OnComplete(() =>
         {
             gameObject.SetActive(false);
@@ -28,6 +29,7 @@ public class BlockAnime : MonoBehaviour
         });
     }
 
+    // 머지된 블럭 생성 애니메이션 
     public void ResetScale(Vector3 blockScale)
     {
         Sequence seq = DOTween.Sequence();

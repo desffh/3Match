@@ -1,14 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+
+// Board 이벤트 구독자 -> 매치 실행
 
 public class MatchFind : MonoBehaviour
 {
     private Board board;
 
+    FindConnectMatch findConnectMatch;
+
+    StraightMatch straightMatch;
+
     private void Awake()
     {
         board = GetComponent<Board>();
+
+        findConnectMatch = new FindConnectMatch(board);
+
+        straightMatch = new StraightMatch(board);
     }
 
     private void OnEnable()
@@ -21,79 +32,202 @@ public class MatchFind : MonoBehaviour
         Board.OnmatchFind -= CheckAllMatches;
     }
 
-    private void CheckAllMatches()
+    public void CheckAllMatches(Block swapBlock)
     {
         Block[,] blocks = board.Blocks;
         int row = board.Row;
         int col = board.Col;
-
         bool[,] visited = new bool[row, col];
 
         for (int y = 0; y < row; y++)
         {
             for (int x = 0; x < col; x++)
             {
+                // 이미 방문했다면 건너뛰기 
                 if (blocks[y, x] == null || visited[y, x])
                     continue;
 
-                // 가로 검사
-                List<Block> horizontal = FindLineMatch(blocks, x, y, Vector2Int.right);
-                if (horizontal.Count >= 3)
-                {
-                    foreach (var b in horizontal)
-                        visited[b.BoardPos.y, b.BoardPos.x] = true;
+                // 인접한 모든 매치 찾기 (동일한 숫자끼리의 덩어리)
+                List<Block> group = findConnectMatch.FindConnectedMatch(blocks, x, y, visited);
 
-                    MergeBlocks(horizontal);
+                if(group.Count <= 1)
+                {
+                    // 되돌리기 애니메이션
                 }
 
-                // 세로 검사
-                List<Block> vertical = FindLineMatch(blocks, x, y, Vector2Int.up);
-                if (vertical.Count >= 3)
-                {
-                    foreach (var b in vertical)
-                        visited[b.BoardPos.y, b.BoardPos.x] = true;
+                // 연속된 매치 찾기
+                List<Block> validGroup = straightMatch.ConnectStraightMatch(group);
 
-                    MergeBlocks(vertical);
+                // 연속된 매치 갯수가 3개 이상이라면 
+                if (validGroup.Count >= 3)
+                {
+                    // 모양이 T 라면
+                    bool isT = IsTShapeMatch(validGroup);
+                    
+                    // T : T자 병합 실행
+                    //일반: 일반 병합 실행
+                    MergeBlocks(validGroup, swapBlock, isT);
                 }
             }
         }
     }
 
-    /// <summary>
-    /// 특정 방향으로 같은 숫자의 블록을 연속해서 찾아냄
-    /// </summary>
-    private List<Block> FindLineMatch(Block[,] blocks, int startX, int startY, Vector2Int dir)
+    // 연속된 블럭 리스트 matched에서 겹치는 블럭 찾기
+
+    private bool IsTShapeMatch(List<Block> matched)
     {
-        List<Block> result = new List<Block>();
-        int num = blocks[startY, startX].Num;
+        Dictionary<int, List<int>> rowMap = new Dictionary<int, List<int>>();
+        Dictionary<int, List<int>> colMap = new Dictionary<int, List<int>>();
+        HashSet<Vector2Int> matchedSet = new HashSet<Vector2Int>();
 
-        int x = startX;
-        int y = startY;
-
-        while (x >= 0 && x < board.Col && y >= 0 && y < board.Row)
+        foreach (Block b in matched)
         {
-            Block b = blocks[y, x];
-            if (b == null || b.Num != num)
-                break;
+            int x = b.BoardPos.x;
+            int y = b.BoardPos.y;
 
-            result.Add(b);
-            x += dir.x;
-            y += dir.y;
+            if (!rowMap.ContainsKey(y)) rowMap[y] = new List<int>();
+            rowMap[y].Add(x);
+
+            if (!colMap.ContainsKey(x)) colMap[x] = new List<int>();
+            colMap[x].Add(y);
+
+            matchedSet.Add(new Vector2Int(x, y));
         }
 
-        return result;
+        List<Vector2Int> horizontalCenters = new List<Vector2Int>();
+        foreach (var kvp in rowMap)
+        {
+            var xs = kvp.Value;
+            xs.Sort();
+
+            for (int i = 0; i < xs.Count - 2; i++)
+            {
+                if (xs[i + 1] == xs[i] + 1 && xs[i + 2] == xs[i] + 2)
+                {
+                    int centerX = xs[i + 1];
+                    horizontalCenters.Add(new Vector2Int(centerX, kvp.Key));
+                }
+            }
+        }
+
+        foreach (var kvp in colMap)
+        {
+            var ys = kvp.Value;
+            ys.Sort();
+
+            for (int i = 0; i < ys.Count - 2; i++)
+            {
+                if (ys[i + 1] == ys[i] + 1 && ys[i + 2] == ys[i] + 2)
+                {
+                    int centerY = ys[i + 1];
+                    Vector2Int candidate = new Vector2Int(kvp.Key, centerY);
+                    if (horizontalCenters.Contains(candidate))
+                        return true;
+                }
+            }
+        }
+
+        return false;
     }
 
-    private void MergeBlocks(List<Block> matched)
+    private Block GetCrossCenterBlock(List<Block> group)
+    {
+        Dictionary<int, List<Block>> rowMap = new Dictionary<int, List<Block>>();
+        Dictionary<int, List<Block>> colMap = new Dictionary<int, List<Block>>();
+
+        foreach (var b in group)
+        {
+            int x = b.BoardPos.x;
+            int y = b.BoardPos.y;
+
+            if (!rowMap.ContainsKey(y)) rowMap[y] = new List<Block>();
+            rowMap[y].Add(b);
+
+            if (!colMap.ContainsKey(x)) colMap[x] = new List<Block>();
+            colMap[x].Add(b);
+        }
+
+        List<Block> horizontal = null;
+        List<Block> vertical = null;
+
+        foreach (var row in rowMap)
+        {
+            if (row.Value.Count >= 3)
+            {
+                var xs = row.Value.Select(b => b.BoardPos.x).ToList();
+                xs.Sort();
+                for (int i = 0; i < xs.Count - 2; i++)
+                {
+                    if (xs[i + 1] == xs[i] + 1 && xs[i + 2] == xs[i] + 2)
+                    {
+                        horizontal = row.Value;
+                        break;
+                    }
+                }
+            }
+        }
+
+        foreach (var col in colMap)
+        {
+            if (col.Value.Count >= 3)
+            {
+                var ys = col.Value.Select(b => b.BoardPos.y).ToList();
+                ys.Sort();
+                for (int i = 0; i < ys.Count - 2; i++)
+                {
+                    if (ys[i + 1] == ys[i] + 1 && ys[i + 2] == ys[i] + 2)
+                    {
+                        vertical = col.Value;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (horizontal != null && vertical != null)
+        {
+            foreach (var h in horizontal)
+            {
+                foreach (var v in vertical)
+                {
+                    if (h == v)
+                        return h;
+                }
+            }
+        }
+
+        return GetLowestBlock(group);
+    }
+
+    private Block GetLowestBlock(List<Block> group)
+    {
+        Block lowest = group[0];
+        foreach (var b in group)
+        {
+            if (b.BoardPos.y > lowest.BoardPos.y)
+            {
+                lowest = b;
+            }
+        }
+        return lowest;
+    }
+
+    private void MergeBlocks(List<Block> matched, Block swapBlock, bool isTShape)
     {
         if (matched == null || matched.Count == 0) return;
 
-        // 아래쪽에 있는 블록을 기준
-        Block main = matched[0];
-        foreach (var b in matched)
+        Block main = null;
+
+        if (isTShape)
         {
-            if (b.BoardPos.y > main.BoardPos.y)
-                main = b;
+            main = GetCrossCenterBlock(matched);
+        }
+        else
+        {
+            if (matched.Contains(swapBlock))
+                main = swapBlock;
+            else
+                main = GetLowestBlock(matched);
         }
 
         int newValue = main.Num + 1;
@@ -106,43 +240,36 @@ public class MatchFind : MonoBehaviour
                 pendingAnimations++;
                 Vector3 targetPos = board.GetWorldPosition(main.BoardPos.x, main.BoardPos.y);
 
-                b.Anime.MergeToAndPop(targetPos,board.BlockScale, () =>
+                b.Anime.MergeToAndPop(targetPos, board.BlockScale, () =>
                 {
                     pendingAnimations--;
-
                     if (pendingAnimations == 0)
                     {
-                        // 모든 애니메이션 끝난 뒤 실행됨
-                        BlockData upgradedData = board.BlockDataManager.Get(newValue);
-
-                        if (upgradedData != null)
-                        {
-                            main.Init(upgradedData);
-                            main.Anime.ResetScale(board.BlockScale);
-                        }
-                        else
-                        {
-                            Debug.LogWarning($"BlockDataManager에 {newValue} 값에 대한 데이터가 없습니다.");
-                        }
+                        ApplyMergedBlock(main, newValue);
                     }
                 });
             }
         }
 
-        // main 혼자면 병합 애니메이션 없으므로 바로 처리
         if (pendingAnimations == 0)
         {
-            BlockData upgradedData = board.BlockDataManager.Get(newValue);
+            ApplyMergedBlock(main, newValue);
+        }
+    }
 
-            if (upgradedData != null)
-            {
-                main.Init(upgradedData);
-                main.Anime.ResetScale(board.BlockScale);
-            }
-            else
-            {
-                Debug.LogWarning($"BlockDataManager에 {newValue} 값에 대한 데이터가 없습니다.");
-            }
+
+    // 블럭 데이터 업그레이드 & 병합
+    private void ApplyMergedBlock(Block main, int newValue)
+    {
+        BlockData upgradedData = board.BlockDataManager.Get(newValue);
+        if (upgradedData != null)
+        {
+            main.Init(upgradedData);
+            main.Anime.ResetScale(board.BlockScale);
+        }
+        else
+        {
+            Debug.Log("6매치 불가능");
         }
     }
 

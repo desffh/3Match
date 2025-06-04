@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static Unity.Collections.AllocatorManager;
 
 
 // 보드를 구성하는 셀 & 블럭 
@@ -49,7 +48,8 @@ public class Board : MonoBehaviour
     public Vector3 BlockScale => blockScale;
 
     // 매치 이벤트
-    public static event Action OnmatchFind;
+    public static event Action<Block> OnmatchFind;
+
 
     private void Awake()
     {
@@ -87,6 +87,7 @@ public class Board : MonoBehaviour
         {
             for (int x = 0; x < col; x++)
             {
+                // 좌표값 (행x, 열y)
                 CreateCell(x, y, cellData);
                 CreateBlock(x, y, blockDataList);
             }
@@ -177,7 +178,7 @@ public class Board : MonoBehaviour
             .OnComplete(() =>
             {
                 // 매치 검사 이벤트 호출
-                OnmatchFind.Invoke();
+                OnmatchFind.Invoke(a);
             });
 
     }
