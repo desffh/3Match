@@ -14,5 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockType: 1
   num: 1
-  sprite: {fileID: 21300000, guid: cfdda460134072c4f9f5ff1a22cd6013, type: 3}
-  color: {r: 0.9716981, g: 0.67821103, b: 0, a: 1}
+  defaultSprite: {fileID: 21300000, guid: cfdda460134072c4f9f5ff1a22cd6013, type: 3}
+  color: {r: 0.7216981, g: 1, b: 0.75953424, a: 1}
+  line4RowSprite: {fileID: 21300000, guid: 9d50a0b79375c204b90802f7e7b17568, type: 3}
+  line4ColSprite: {fileID: 21300000, guid: 9d50a0b79375c204b90802f7e7b17568, type: 3}
+  tShapeSprite: {fileID: 21300000, guid: 80dd9b7accfa8e8488e71f3996ec1b1f, type: 3}
+  lShapeSprite: {fileID: 21300000, guid: 80dd9b7accfa8e8488e71f3996ec1b1f, type: 3}

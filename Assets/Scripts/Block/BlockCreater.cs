@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
-// 블럭 생성용 스크립트
+/// <summary>
+/// 블럭 생성용 스크립트
+/// </summary>
 
 public class BlockCreater : MonoBehaviour
 {

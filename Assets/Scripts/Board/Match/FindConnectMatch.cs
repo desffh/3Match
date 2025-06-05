@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// summary
-// BFS(너비 우선 탐색)을 사용한 인접한 숫자 블록 그룹 반환
-// ( == 연결된 숫자 덩어리)
-// summary
+/// <summary>
+/// BFS(너비 우선 탐색)을 사용한 인접한 숫자 블록 그룹 반환
+/// ( == 연결된 숫자 덩어리)
+/// </summary>
 
 public class FindConnectMatch
 {

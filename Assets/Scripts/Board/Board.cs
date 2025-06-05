@@ -6,7 +6,10 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 
-// 보드를 구성하는 셀 & 블럭 
+/// <summary>
+/// 보드를 구성하는 셀 
+/// </summary>
+
 public class Board : MonoBehaviour
 {
     [SerializeField] private GameObject cellPrefab;
@@ -25,6 +28,7 @@ public class Board : MonoBehaviour
     [SerializeField] private BlockDataManager blockDataManager;
 
     public BlockDataManager BlockDataManager => blockDataManager;
+
 
     private BlockCreater blockCreater;
 
@@ -48,7 +52,7 @@ public class Board : MonoBehaviour
     public Vector3 BlockScale => blockScale;
 
     // 매치 이벤트
-    public static event Action<Block> OnmatchFind;
+    public static event Action OnmatchFind;
 
 
     private void Awake()
@@ -121,6 +125,19 @@ public class Board : MonoBehaviour
         blocks[y, x] = block;
     }
 
+    // 블럭 파괴 (반환)
+    public void RemoveBlock(Block block)
+    {
+        if (block == null) return;
+
+        Blocks[block.BoardPos.y, block.BoardPos.x] = null;
+
+        //block.Reset(); // Num, Type 등 초기화
+
+        blockCreater.DespawnBlock(block);
+    }
+
+
     // 셀, 블럭 위치 계산
     public Vector3 GetWorldPosition(int x, int y)
     {
@@ -178,7 +195,7 @@ public class Board : MonoBehaviour
             .OnComplete(() =>
             {
                 // 매치 검사 이벤트 호출
-                OnmatchFind.Invoke(a);
+                OnmatchFind.Invoke();
             });
 
     }

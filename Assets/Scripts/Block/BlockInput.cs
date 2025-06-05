@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 블록 클릭 입력받기
+/// <summary>
+/// 블록 클릭 입력받기
+/// </summary>
 
 public class BlockInput : MonoBehaviour
 {
