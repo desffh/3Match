@@ -20,6 +20,8 @@ public class BlockData : ScriptableObject
     [Header("특수 블록 스프라이트")]
     [SerializeField] private Sprite line4RowSprite;
     [SerializeField] private Sprite line4ColSprite;
+    [SerializeField] private Sprite line5RowSprite;
+    [SerializeField] private Sprite line5ColSprite;
     [SerializeField] private Sprite tShapeSprite;
     [SerializeField] private Sprite lShapeSprite;
 
@@ -38,6 +40,8 @@ public class BlockData : ScriptableObject
         {
             MatchType.Line4_Row => line4RowSprite,
             MatchType.Line4_Col => line4ColSprite,
+            MatchType.Line5_Row => line5RowSprite,
+            MatchType.Line5_Col => line5ColSprite,
             MatchType.TShape => tShapeSprite,
             MatchType.LShape => lShapeSprite,
             _ => defaultSprite,

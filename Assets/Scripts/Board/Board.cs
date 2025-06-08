@@ -4,11 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-
-
-/// <summary>
-/// 보드를 구성하는 셀 
-/// </summary>
+using static UnityEditor.PlayerSettings;
 
 public class Board : MonoBehaviour
 {
@@ -26,38 +22,42 @@ public class Board : MonoBehaviour
     [SerializeField] private float targetHeight = 8f;
 
     [SerializeField] private BlockDataManager blockDataManager;
-
     public BlockDataManager BlockDataManager => blockDataManager;
-
 
     private BlockCreater blockCreater;
 
-    int row; // 행
-    int col; // 열
+    private int row;
+    private int col;
 
-    // 2차원 배열
     private Cell[,] cells;
     private Block[,] blocks;
-
-    public int Row => row;
-    public int Col => col;
-
-    public Cell[,] Cells => cells;
-    public Block[,] Blocks => blocks;
-
 
     private float cellSpacing;
     private Vector3 blockScale;
 
-    public Vector3 BlockScale => blockScale;
+    public float dropDuration = 0.3f;
 
-    // 매치 이벤트
+    public Vector3 BlockScale => blockScale;
+    public Cell[,] Cells => cells;
+    public Block[,] Blocks => blocks;
+    public int Row => row;
+    public int Col => col;
+
     public static event Action OnmatchFind;
 
+    public static event Action FirstOnmatchFind;
+
+
+    private List<BlockData> blockDatas = new List<BlockData>();
+
+
+    [SerializeField] int dataCount;
 
     private void Awake()
     {
         blockCreater = GetComponent<BlockCreater>();
+
+        dataCount = BlockDataManager.blockDataList.Count;
     }
 
     private void OnEnable()
@@ -65,12 +65,16 @@ public class Board : MonoBehaviour
         BlockInput.OnSwapRequest += TrySwap;
     }
 
+    private void OnDisable()
+    {
+        BlockInput.OnSwapRequest -= TrySwap;
+    }
+
     private void Start()
     {
         blockDataManager.Init();
     }
 
-    // 2차원 배열 크기 설정 [row, col]
     public void Init(int nRow, int nCol)
     {
         row = nRow;
@@ -79,36 +83,51 @@ public class Board : MonoBehaviour
         cells = new Cell[row, col];
         blocks = new Block[row, col];
 
-        blockCreater.Init(); // 블럭 배열 생성되면 오브젝트 풀 생성 & 초기화
-
+        blockCreater.Init();
         CalculateLayout();
     }
 
-    // 셀, 블럭 오브젝트 생성
     public void SpawnBoard(CellData cellData, List<BlockData> blockDataList)
     {
+        blockDatas = blockDataList;
+
         for (int y = 0; y < row; y++)
         {
             for (int x = 0; x < col; x++)
             {
-                // 좌표값 (행x, 열y)
                 CreateCell(x, y, cellData);
-                CreateBlock(x, y, blockDataList);
             }
         }
+        // 보드 셀 생성 후 블록 생성 시작
+        //StartCoroutine(FillUntilStable());
+        FirstOnmatchFind.Invoke();
+
     }
 
-    // 셀 생성
+
+
+
+
+    public IEnumerator FillUntilStable()
+    {
+        bool filled;
+
+        do
+        {
+            filled = FillRoutine();
+            yield return new WaitForSeconds(dropDuration);
+        } while (filled);
+    }
+
+
     private void CreateCell(int x, int y, CellData cellData)
     {
         Vector3 pos = GetWorldPosition(x, y);
         GameObject cellObj = Instantiate(cellPrefab, pos, Quaternion.identity, transform);
-
         cellObj.transform.localScale = blockScale;
 
         Cell cell = cellObj.GetComponent<Cell>();
-
-        cell.Init(cellData); // 데이터 주입
+        cell.Init(cellData);
 
         cells[y, x] = cell;
     }
@@ -125,84 +144,111 @@ public class Board : MonoBehaviour
         blocks[y, x] = block;
     }
 
-    // 블럭 파괴 (반환)
+    public bool FillRoutine()
+    {
+        bool isBlockMove = false;
+
+        for (int j = 1; j < Row; j++) // j는 1부터 시작!
+        {
+            for (int i = 0; i < Col; i++)
+            {
+                if (blocks[j, i] == null) continue;
+
+                Block curPuzzle = blocks[j, i];
+                Block belowPuzzle = blocks[j - 1, i];
+
+                if (belowPuzzle == null)
+                {
+                    PuzzleChange(curPuzzle, i, j - 1);
+                    isBlockMove = true;
+                }
+            }
+        }
+
+        dataCount = 3;
+
+        // 최상단 퍼즐 생성
+        for (int i = 0; i < Col; i++)  //  여기도 Col 기준으로
+        {
+            if (blocks[Row - 1, i] == null)
+            {
+                Vector3 pos = GetWorldPosition(i, Row - 1);
+
+                BlockData blockData = BlockDataManager.blockDataList[
+                    UnityEngine.Random.Range(0, dataCount)];
+
+                Block block = blockCreater.SpawnBlock(pos, blockData, new Vector2Int(i, Row - 1), blockScale);
+
+                block.Anime.MoveTo2(pos, 0.2f);
+
+                blocks[Row - 1, i] = block;
+
+                isBlockMove = true;
+            }
+        }
+
+        return isBlockMove;
+    }
+
+
+    //퍼즐 이동 후 배열,x,y값 바꾸기
+    void PuzzleChange(Block curPuzzle, int newX, int newY)
+    {
+        blocks[curPuzzle.BoardPos.y, curPuzzle.BoardPos.x] = null;
+        curPuzzle.SetBoardPos(newX, newY);
+        curPuzzle.Anime.MoveTo2(GetWorldPosition(newX, newY), 0.1f);
+        blocks[newY, newX] = curPuzzle;
+    }
+
     public void RemoveBlock(Block block)
     {
         if (block == null) return;
-
-        Blocks[block.BoardPos.y, block.BoardPos.x] = null;
-
-        //block.Reset(); // Num, Type 등 초기화
-
+        blocks[block.BoardPos.y, block.BoardPos.x] = null;
         blockCreater.DespawnBlock(block);
     }
 
-
-    // 셀, 블럭 위치 계산
-    public Vector3 GetWorldPosition(int x, int y)
-    {
-        return new Vector3(x * cellSpacing, y * cellSpacing, 0) + (Vector3)boardOrigin;
-    }
-
-    // 그리드 크기 & 위치 계산
     private void CalculateLayout()
     {
-        // 전체 보드 사이즈
-        float rawBoardWidth = col * BaseCellSpacing;
-        float rawBoardHeight = row * BaseCellSpacing;
+        float rawWidth = col * BaseCellSpacing;
+        float rawHeight = row * BaseCellSpacing;
 
-        // 화면에 맞추기 위한 스케일 계수
-        float scaleFactor = Mathf.Min(targetWidth / rawBoardWidth, targetHeight / rawBoardHeight);
+        float scaleFactor = Mathf.Min(targetWidth / rawWidth, targetHeight / rawHeight);
 
-        // 스케일 조정
         cellSpacing = BaseCellSpacing * scaleFactor;
         blockScale = baseBlockScale * scaleFactor;
 
         float totalWidth = (col - 1) * cellSpacing;
         float totalHeight = (row - 1) * cellSpacing;
 
-        // 보드 시작 위치 계산
         boardOrigin = new Vector2(-totalWidth / 2f, -totalHeight / 2f);
     }
 
 
-    // 두 블럭 위치 스왑
+    public Vector3 GetWorldPosition(int x, int y)
+    {
+        return new Vector3(x * cellSpacing, y * cellSpacing, 0) + (Vector3)boardOrigin;
+    }
+
     public void TrySwap(Block a, Block b)
     {
         Vector2Int posA = a.BoardPos;
         Vector2Int posB = b.BoardPos;
 
-        // 1. 배열에서 위치 바꾸기
         blocks[posA.y, posA.x] = b;
         blocks[posB.y, posB.x] = a;
 
-        // 2. 블록 내부 좌표 업데이트
         a.SetBoardPos(posB.x, posB.y);
         b.SetBoardPos(posA.x, posA.y);
 
-        // 3. 월드 위치 바꾸기 (애니메이션 추가 가능)
-        Vector3 worldA = GetWorldPosition(posA.x, posA.y);
-        Vector3 worldB = GetWorldPosition(posB.x, posB.y);
-
-        // 4. 애니메이션 처리
         Tween tweenA = a.Anime.MoveTo(GetWorldPosition(posB.x, posB.y));
         Tween tweenB = b.Anime.MoveTo(GetWorldPosition(posA.x, posA.y));
 
-        // 콜백 등록 (두 트윈이 모두 완료되었을 때)
         DOTween.Sequence()
             .Append(tweenA)
             .Join(tweenB)
-            .OnComplete(() =>
-            {
-                // 매치 검사 이벤트 호출
-                OnmatchFind.Invoke();
-            });
+            .OnComplete(() => OnmatchFind?.Invoke());
+        
 
     }
 
-
-    private void OnDisable()
-    {
-        BlockInput.OnSwapRequest -= TrySwap;
-    }
 }

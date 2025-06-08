@@ -15,8 +15,10 @@ MonoBehaviour:
   blockType: 1
   num: 3
   defaultSprite: {fileID: 21300000, guid: 989e4ba2b57a2304aad2068ee13e41d2, type: 3}
-  color: {r: 0, g: 1, b: 0.033422947, a: 1}
+  color: {r: 0.61960787, g: 0.77647066, b: 0.95294124, a: 1}
   line4RowSprite: {fileID: 21300000, guid: fa69aaa314886b1499a1442bbb772e7a, type: 3}
   line4ColSprite: {fileID: 21300000, guid: fa69aaa314886b1499a1442bbb772e7a, type: 3}
-  tShapeSprite: {fileID: 21300000, guid: 9b14ea7d76e9b1d448fd40be1d61c938, type: 3}
-  lShapeSprite: {fileID: 21300000, guid: 9b14ea7d76e9b1d448fd40be1d61c938, type: 3}
+  line5RowSprite: {fileID: 21300000, guid: 74d9e69cfdf7a3446ad2e6d624bce046, type: 3}
+  line5ColSprite: {fileID: 21300000, guid: 74d9e69cfdf7a3446ad2e6d624bce046, type: 3}
+  tShapeSprite: {fileID: 21300000, guid: 4c3fa77585ad31f4f8abba99f24981f6, type: 3}
+  lShapeSprite: {fileID: 21300000, guid: 4c3fa77585ad31f4f8abba99f24981f6, type: 3}

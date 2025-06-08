@@ -41,4 +41,9 @@ public class BlockAnime : MonoBehaviour
             transform.localScale = blockScale; // 풀에서 꺼낼 때 호출용
         });
     }
+
+    public Tween MoveTo2(Vector3 target, float duration = 0.25f)
+    {
+        return transform.DOMove(target, duration).SetEase(Ease.InBack);
+    }
 }

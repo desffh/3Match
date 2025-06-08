@@ -28,7 +28,7 @@ public class MatchManager
         this.matchMerger = matchMerger;
     }
 
-    public void ProcessMatch(List<Block> group)
+    public bool ProcessMatch(List<Block> group)
     {
         foreach (IMatchRule rule in matchRules.OrderByDescending(r => r.priority))
         {
@@ -39,11 +39,12 @@ public class MatchManager
                 if (matched != null && matched.Count > 0)
                 {
                     // 병합할 블럭 리스트를 인자로 넘김
-                    matchMerger.Merge(matched, rule.matchType);
+                    return matchMerger.Merge(matched, rule.matchType);
                 }
-                return; // 하나만 처리 (우선순위 적용)
+                return false; // 하나만 처리 (우선순위 적용)
             }
         }
         // 매치 없음
+        return false;
     }
 }

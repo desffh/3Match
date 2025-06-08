@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Block/BlockDataManager")]
 public class BlockDataManager : ScriptableObject
 {
-    [SerializeField] private List<BlockData> blockDataList;
+    [SerializeField] public List<BlockData> blockDataList;
 
     private Dictionary<int, BlockData> blockDataDict;
 

@@ -33,20 +33,65 @@ public class MatchFind : MonoBehaviour
 
     private void OnEnable()
     {
-        Board.OnmatchFind += CheckAllMatches;
+        Board.OnmatchFind += HandleOnMatchFind;
+        Board.FirstOnmatchFind += FirstHandleOnMatchFind;
     }
 
     private void OnDisable()
     {
-        Board.OnmatchFind -= CheckAllMatches;
+        Board.OnmatchFind -= HandleOnMatchFind;
+        Board.FirstOnmatchFind -= FirstHandleOnMatchFind;
+
     }
 
-    public void CheckAllMatches()
+    private void HandleOnMatchFind()
+    {
+        StartCoroutine(MatchLoop());
+    }
+    private void FirstHandleOnMatchFind()
+    {
+        StartCoroutine(SpawnAndMatchLoop());
+    }
+    private IEnumerator SpawnAndMatchLoop()
+    {
+        bool matched;
+
+        do
+        {
+            yield return board.StartCoroutine(board.FillUntilStable());
+            yield return new WaitForSeconds(0.2f);
+
+            matched = CheckAllMatches(); // 직접 호출 (이벤트 아님)
+            yield return new WaitForSeconds(0.3f);
+
+
+        } while (matched);
+    }
+
+
+    private IEnumerator MatchLoop()
+    {
+        bool matched;
+
+        do
+        {
+            matched = CheckAllMatches(); // 직접 호출 (이벤트 아님)
+            yield return new WaitForSeconds(0.3f);
+
+            yield return board.StartCoroutine(board.FillUntilStable());
+            yield return new WaitForSeconds(0.2f);
+
+        } while (matched);
+    }
+
+    public bool CheckAllMatches()
     {
         Block[,] blocks = board.Blocks;
         int row = board.Row;
         int col = board.Col;
         bool[,] visited = new bool[row, col];
+
+        bool check;
 
         for (int y = 0; y < row; y++)
         {
@@ -59,7 +104,7 @@ public class MatchFind : MonoBehaviour
                 // 인접한 모든 매치 찾기 (동일한 숫자끼리의 덩어리)
                 List<Block> group = findConnectMatch.FindConnectedMatch(blocks, x, y, visited);
 
-                if(group.Count <= 1)
+                if (group.Count <= 1)
                 {
                     // 되돌리기 애니메이션
                 }
@@ -72,9 +117,16 @@ public class MatchFind : MonoBehaviour
                 {
                     // T : T자 병합 실행
                     //일반: 일반 병합 실행
-                    matchManager.ProcessMatch(validGroup);
+                    if(matchManager.ProcessMatch(validGroup))
+                    {
+                        check = true;
+                        return check;
+                    }
+                    
                 }
             }
         }
+
+        return false;
     }
 }
