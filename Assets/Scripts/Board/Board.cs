@@ -185,7 +185,7 @@ public class Board : MonoBehaviour
                 // 아래 블럭이 비어있다면 
                 if (belowBlock == null)
                 {
-                    PuzzleChange(curBlock, i, j - 1);
+                    BlockChange(curBlock, i, j - 1);
                     isBlockMove = true;
                 }
             }
@@ -225,7 +225,7 @@ public class Board : MonoBehaviour
     /// 새로 들어온 좌표값을 블럭에 할당 후 배열에 블럭 저장
     /// </summary>
     
-    void PuzzleChange(Block curBlock, int newX, int newY)
+    void BlockChange(Block curBlock, int newX, int newY)
     {
         blocks[curBlock.BoardPos.y, curBlock.BoardPos.x] = null;
         curBlock.SetBoardPos(newX, newY);// 좌표 설정 2차원 좌표 (x, y)
