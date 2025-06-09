@@ -38,6 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -517,7 +518,7 @@ MonoBehaviour:
   targetWidth: 8
   targetHeight: 8
   blockDataManager: {fileID: 11400000, guid: 4f9374e84e73c054c9e3450d1fdd659f, type: 2}
-  dropDuration: 0.15
+  dropDuration: 0.5
   dataCount: 3
 --- !u!114 &610857188
 MonoBehaviour:
@@ -765,6 +766,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   firstBlock: {fileID: 0}
   secondBlock: {fileID: 0}
+  board: {fileID: 610857187}
 --- !u!1 &1947148877
 GameObject:
   m_ObjectHideFlags: 0

@@ -44,6 +44,6 @@ public class BlockAnime : MonoBehaviour
 
     public Tween MoveTo2(Vector3 target, float duration = 0.25f)
     {
-        return transform.DOMove(target, duration).SetEase(Ease.InBack);
+        return transform.DOMove(target, duration).SetEase(Ease.InOutBack);
     }
 }

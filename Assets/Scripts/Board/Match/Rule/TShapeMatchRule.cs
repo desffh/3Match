@@ -15,9 +15,6 @@ public class TShapeMatchRule : IMatchRule
     public MatchType matchType => _matchType;
     public int priority => _priority;
 
-    /// <summary>
-    /// T자 매치 여부 판단
-    /// </summary>
     public bool isMatch(List<Block> group)
     {
         if (group == null || group.Count < requireBlockCount)
@@ -29,10 +26,6 @@ public class TShapeMatchRule : IMatchRule
         return TryFindTShapeCenter(positions, posToBlock, out _);
     }
 
-    /// <summary>
-    /// 병합에 사용할 T자 블록 5개 반환
-    /// -> 외부에서 호출해서 사용
-    /// </summary>
     public List<Block> ExtractMatchBlocks(List<Block> group)
     {
         if (group == null || group.Count < requireBlockCount)
@@ -47,9 +40,14 @@ public class TShapeMatchRule : IMatchRule
         return null;
     }
 
-    /// <summary>
-    /// T자 중심과 주변 3방향이 연결된 블록을 찾음
-    /// </summary>
+    private static readonly (Vector2Int[] line, Vector2Int[] arms)[] TPatterns =
+    {
+    (new[] { Vector2Int.up, Vector2Int.up * 2 }, new[] { Vector2Int.left, Vector2Int.right }),
+    (new[] { Vector2Int.down, Vector2Int.down * 2 }, new[] { Vector2Int.left, Vector2Int.right }),
+    (new[] { Vector2Int.left, Vector2Int.left * 2 }, new[] { Vector2Int.up, Vector2Int.down }),
+    (new[] { Vector2Int.right, Vector2Int.right * 2 }, new[] { Vector2Int.up, Vector2Int.down }),
+};
+
     private bool TryFindTShapeCenter(
         HashSet<Vector2Int> positions,
         Dictionary<Vector2Int, Block> posToBlock,
@@ -57,41 +55,27 @@ public class TShapeMatchRule : IMatchRule
     {
         foreach (Vector2Int center in positions)
         {
-            List<Vector2Int> connectedDirs = new();
+            if (!posToBlock.ContainsKey(center)) continue;
 
-            if (positions.Contains(center + Vector2Int.up)) connectedDirs.Add(Vector2Int.up);
-            if (positions.Contains(center + Vector2Int.down)) connectedDirs.Add(Vector2Int.down);
-            if (positions.Contains(center + Vector2Int.left)) connectedDirs.Add(Vector2Int.left);
-            if (positions.Contains(center + Vector2Int.right)) connectedDirs.Add(Vector2Int.right);
-
-            if (connectedDirs.Count >= 3 && posToBlock.ContainsKey(center))
+            foreach (var (line, arms) in TPatterns)
             {
-                var result = new List<Block> { posToBlock[center] };
+                Vector2Int line1 = center + line[0];
+                Vector2Int line2 = center + line[1];
+                Vector2Int arm1 = center + arms[0];
+                Vector2Int arm2 = center + arms[1];
 
-                foreach (var dir in connectedDirs)
+                // 모든 방향에 퍼즐이 있는지 확인
+                if (positions.Contains(line1) && positions.Contains(line2) &&
+                    positions.Contains(arm1) && positions.Contains(arm2))
                 {
-                    Vector2Int neighborPos = center + dir;
-                    if (posToBlock.TryGetValue(neighborPos, out var neighbor))
-                        result.Add(neighbor);
-                }
-
-                // 핵심: 빠진 블록이 group에 하나 더 있을 수 있음!
-                if (result.Count < 5)
+                    matchedBlocks = new()
                 {
-                    // group에서 아직 추가되지 않은 블록을 하나 더 넣는다
-                    foreach (var b in posToBlock.Values)
-                    {
-                        if (!result.Contains(b))
-                        {
-                            result.Add(b);
-                            break;
-                        }
-                    }
-                }
-
-                if (result.Count == 5)
-                {
-                    matchedBlocks = result;
+                    posToBlock[center],
+                    posToBlock[line1],
+                    posToBlock[line2],
+                    posToBlock[arm1],
+                    posToBlock[arm2]
+                };
                     return true;
                 }
             }
@@ -100,4 +84,7 @@ public class TShapeMatchRule : IMatchRule
         matchedBlocks = null;
         return false;
     }
+
+
 }
+

@@ -11,12 +11,13 @@ using UnityEngine.UI;
 /// : 스프라이트
 /// : 색상
 /// : 블록 타입
-///
+/// </summary>
+
+/// <summary>
 /// [특수 블록이 되었을 경우]
 /// : 특수 블록 타입
 /// : 스프라이트
 /// </summary>
-
 
 public class Block : MonoBehaviour
 {

@@ -11,21 +11,21 @@ public class MatchFind : MonoBehaviour
 {
     private Board board;
 
+    // 동일한 숫자 덩어리 반환
     private FindConnectMatch findConnectMatch;
 
-    private StraightMatch straightMatch;
-
+    // 매치 판단
     private MatchManager matchManager;
-
+    // 병합 실행
     private MatchMerger matchMerger;
+
 
     private void Awake()
     {
         board = GetComponent<Board>();
 
+        // 객체 생성 & 생성자 주입
         findConnectMatch = new FindConnectMatch(board);
-        straightMatch = new StraightMatch(board);
-
         matchMerger = new MatchMerger(board);
         matchManager = new MatchManager(matchMerger);
 
@@ -52,6 +52,12 @@ public class MatchFind : MonoBehaviour
     {
         StartCoroutine(SpawnAndMatchLoop());
     }
+
+    /// <summary>
+    /// 첫 시작 시 블럭 생성 & 매치 확인
+    /// </summary>
+    /// <returns></returns>
+
     private IEnumerator SpawnAndMatchLoop()
     {
         bool matched;
@@ -61,29 +67,39 @@ public class MatchFind : MonoBehaviour
             yield return board.StartCoroutine(board.FillUntilStable());
             yield return new WaitForSeconds(0.2f);
 
-            matched = CheckAllMatches(); // 직접 호출 (이벤트 아님)
+            matched = CheckAllMatches();
             yield return new WaitForSeconds(0.3f);
-
-
-        } while (matched);
+        } 
+        while (matched);
     }
 
 
+    /// <summary>
+    /// 스왑 후 매치 확인 & 블럭 생성
+    /// </summary>
+    
     private IEnumerator MatchLoop()
     {
         bool matched;
 
         do
         {
-            matched = CheckAllMatches(); // 직접 호출 (이벤트 아님)
+            matched = CheckAllMatches();
             yield return new WaitForSeconds(0.3f);
 
             yield return board.StartCoroutine(board.FillUntilStable());
             yield return new WaitForSeconds(0.2f);
 
         } while (matched);
+
+        if(!matched)
+        {
+            // 매치되는 게 없다면 되돌리기 애니메이션 호출 후 종료
+            yield break;
+        }
     }
 
+    // 매치 이벤트
     public bool CheckAllMatches()
     {
         Block[,] blocks = board.Blocks;
@@ -104,29 +120,19 @@ public class MatchFind : MonoBehaviour
                 // 인접한 모든 매치 찾기 (동일한 숫자끼리의 덩어리)
                 List<Block> group = findConnectMatch.FindConnectedMatch(blocks, x, y, visited);
 
-                if (group.Count <= 1)
-                {
-                    // 되돌리기 애니메이션
-                }
-
-                // 연속된 매치 찾기
-                List<Block> validGroup = straightMatch.ConnectStraightMatch(group);
-
-                // 연속된 매치 갯수가 3개 이상이라면 
-                if (validGroup.Count >= 3)
+                // 매치 갯수가 3개 이상이라면 
+                if (group.Count >= 3)
                 {
                     // T : T자 병합 실행
                     //일반: 일반 병합 실행
-                    if(matchManager.ProcessMatch(validGroup))
+                    if (matchManager.ProcessMatch(group))
                     {
                         check = true;
                         return check;
                     }
-                    
                 }
             }
-        }
-
+        } 
         return false;
     }
 }
