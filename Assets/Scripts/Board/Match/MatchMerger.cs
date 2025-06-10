@@ -25,6 +25,7 @@ public class MatchMerger
 
         // 중심 블록 계산
         Block center = GetMergeCenter(blocks, matchType);
+
         if (matchType == MatchType.Line3_Row || matchType == MatchType.Line3_Col)
         {
             // 3매치: Num 업그레이드
@@ -40,7 +41,7 @@ public class MatchMerger
             center.Init(blockData);
             center.ApplySpecial(matchType);
 
-            Debug.Log($"[Merge] 3매치 업그레이드: {blocks[0].Num} → {newNum}");
+            Debug.Log($" 3매치 업그레이드! ");
 
 
         }
@@ -48,8 +49,6 @@ public class MatchMerger
         {
             // 4매치 이상은 특수 블록 생성
             CreateSpecialBlock(center, blocks[0].Num, matchType);
-
-
         }
 
         // 나머지 블록 제거
@@ -64,8 +63,6 @@ public class MatchMerger
                 center.Anime.ResetScale(board.BlockScale);
             }
         }
-
-        Debug.Log($"[MERGE] {matchType} merged at {center.BoardPos}");
 
         return true;
     }

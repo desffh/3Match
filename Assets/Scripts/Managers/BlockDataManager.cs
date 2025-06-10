@@ -29,7 +29,7 @@ public class BlockDataManager : ScriptableObject
             return null;
         }
 
-        if (blockDataDict.TryGetValue(num, out var data))
+        if (blockDataDict.TryGetValue(num, out BlockData data))
             return data;
 
         Debug.LogWarning($"BlockData Num {num} not found.");

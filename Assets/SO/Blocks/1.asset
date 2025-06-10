@@ -18,7 +18,7 @@ MonoBehaviour:
   color: {r: 1, g: 0.9450981, b: 0.8352942, a: 1}
   line4RowSprite: {fileID: 21300000, guid: 9d50a0b79375c204b90802f7e7b17568, type: 3}
   line4ColSprite: {fileID: 21300000, guid: 9d50a0b79375c204b90802f7e7b17568, type: 3}
-  line5RowSprite: {fileID: 21300000, guid: 01cd216421f0ccb40833443d60b21a00, type: 3}
-  line5ColSprite: {fileID: 21300000, guid: 01cd216421f0ccb40833443d60b21a00, type: 3}
-  tShapeSprite: {fileID: 21300000, guid: 766032591ab044147b99ac405d8b427d, type: 3}
-  lShapeSprite: {fileID: 21300000, guid: 766032591ab044147b99ac405d8b427d, type: 3}
+  line5RowSprite: {fileID: 21300000, guid: 9d50a0b79375c204b90802f7e7b17568, type: 3}
+  line5ColSprite: {fileID: 21300000, guid: 9d50a0b79375c204b90802f7e7b17568, type: 3}
+  tShapeSprite: {fileID: 21300000, guid: 01cd216421f0ccb40833443d60b21a00, type: 3}
+  lShapeSprite: {fileID: 21300000, guid: 01cd216421f0ccb40833443d60b21a00, type: 3}

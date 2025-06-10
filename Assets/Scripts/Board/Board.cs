@@ -151,18 +151,6 @@ public class Board : MonoBehaviour
 
         cells[y, x] = cell;
     }
-
-    // 블럭 생성
-    private void CreateBlock(int x, int y, List<BlockData> blockDataList)
-    {
-        Vector3 pos = GetWorldPosition(x, y);
-
-        BlockData blockData = blockDataList[UnityEngine.Random.Range(0, blockDataList.Count)];
-
-        Block block = blockCreater.SpawnBlock(pos, blockData, new Vector2Int(x, y), blockScale);
-
-        blocks[y, x] = block;
-    }
     
     /// <summary>
     /// 블록 최상단 생성 & 빈자리가 없을 때 까지 생성

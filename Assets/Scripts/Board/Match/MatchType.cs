@@ -11,9 +11,9 @@ public enum MatchType
     Line4_Col,
     Line5_Row,
     Line5_Col,
-    Square,
     TShape,
-    LShape
+    LShape,
+    Square,
 }
 
 

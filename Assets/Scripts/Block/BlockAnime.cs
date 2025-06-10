@@ -16,11 +16,12 @@ public class BlockAnime : MonoBehaviour
         return transform.DOMove(worldPos, 0.2f).SetEase(Ease.OutQuart);
     }
 
-    // 매치 시 머지 애니메이션 
+    // 매치 시 병합 애니메이션 
     public void MergeToAndPop(Vector3 targetPos, Vector3 blockScale, System.Action onComplete = null)
     {
         Sequence seq = DOTween.Sequence();
-        seq.Append(transform.DOMove(targetPos, 0.25f).SetEase(Ease.InOutQuad));
+
+        seq.Append(transform.DOMove(targetPos, 0.15f).SetEase(Ease.InOutQuad));
         seq.Join(transform.DOScale(blockScale, 0.2f).SetEase(Ease.InBack));
         seq.OnComplete(() =>
         {
@@ -29,12 +30,13 @@ public class BlockAnime : MonoBehaviour
         });
     }
 
-    // 머지된 블럭 생성 애니메이션 
+    // 병합된 블럭 생성 애니메이션 
     public void ResetScale(Vector3 blockScale)
     {
         Sequence seq = DOTween.Sequence();
+
         seq.Append(transform.DOScale(blockScale + new Vector3(0.1f, 0.1f, 0.1f), 0.2f).SetEase(Ease.OutSine));
-        seq.Append(transform.DOScale(blockScale, 0.3f).SetEase(Ease.OutBack));
+        seq.Append(transform.DOScale(blockScale, 0.2f).SetEase(Ease.OutBack));
 
         seq.OnComplete(() =>
         {

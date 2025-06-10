@@ -65,10 +65,10 @@ public class MatchFind : MonoBehaviour
         do
         {
             yield return board.StartCoroutine(board.FillUntilStable());
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.1f);
 
             matched = CheckAllMatches();
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.2f);
         } 
         while (matched);
     }
@@ -85,10 +85,10 @@ public class MatchFind : MonoBehaviour
         do
         {
             matched = CheckAllMatches();
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.2f);
 
             yield return board.StartCoroutine(board.FillUntilStable());
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.1f);
 
         } while (matched);
 
@@ -123,8 +123,6 @@ public class MatchFind : MonoBehaviour
                 // 매치 갯수가 3개 이상이라면 
                 if (group.Count >= 3)
                 {
-                    // T : T자 병합 실행
-                    //일반: 일반 병합 실행
                     if (matchManager.ProcessMatch(group))
                     {
                         check = true;
@@ -133,6 +131,7 @@ public class MatchFind : MonoBehaviour
                 }
             }
         } 
+        // 매치 갯수가 3개 미만이면 3매치도 안된다는 뜻 -> false반환 
         return false;
     }
 }

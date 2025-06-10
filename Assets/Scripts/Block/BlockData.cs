@@ -17,6 +17,7 @@ public class BlockData : ScriptableObject
     [SerializeField] private Sprite defaultSprite;
     [SerializeField] private Color color;
 
+
     [Header("특수 블록 스프라이트")]
     [SerializeField] private Sprite line4RowSprite;
     [SerializeField] private Sprite line4ColSprite;

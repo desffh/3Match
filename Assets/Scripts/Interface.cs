@@ -6,9 +6,6 @@ using System.Collections.Generic;
 
 public interface IMatchRule
 {
-    // 개별 매치 로직
-    bool isMatch(List<Block> group);
-
     // 매치된 블럭 반환
     List<Block> ExtractMatchBlocks(List <Block> group);
 
