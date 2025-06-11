@@ -70,9 +70,14 @@ public class Block : MonoBehaviour
 
         Sprite specialSprite = blockdata.GetSpriteByMatchType(matchType);
 
+        Color specialColor = blockdata.GetColorByMatchType(matchType);
+
+        // 특수 블럭 스프라이트 & 색상 적용
         if (specialSprite != null)
         {
             spriteRenderer.sprite = specialSprite;
+            
+            spriteRenderer.color = specialColor;    
         }
     }
 

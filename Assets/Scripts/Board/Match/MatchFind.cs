@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Unity.VisualScripting.Antlr3.Runtime;
 
 /// summary
 /// Board 이벤트 구독자 -> 매치 실행
@@ -73,7 +74,6 @@ public class MatchFind : MonoBehaviour
         while (matched);
     }
 
-
     /// <summary>
     /// 스왑 후 매치 확인 & 블럭 생성
     /// </summary>
@@ -99,7 +99,10 @@ public class MatchFind : MonoBehaviour
         }
     }
 
-    // 매치 이벤트
+    /// <summary>
+    /// 매치 시작 - 1. BFS 2. IMatchRule 전략패턴 3. 병합
+    /// </summary>
+    
     public bool CheckAllMatches()
     {
         Block[,] blocks = board.Blocks;
@@ -107,31 +110,50 @@ public class MatchFind : MonoBehaviour
         int col = board.Col;
         bool[,] visited = new bool[row, col];
 
-        bool check;
+        // 모든 블럭 순회 후 그룹을 담을 리스트
+        List<List<Block>> allGroups = new();
 
         for (int y = 0; y < row; y++)
         {
             for (int x = 0; x < col; x++)
             {
-                // 이미 방문했다면 건너뛰기 
                 if (blocks[y, x] == null || visited[y, x])
+                {
                     continue;
+                }
 
-                // 인접한 모든 매치 찾기 (동일한 숫자끼리의 덩어리)
                 List<Block> group = findConnectMatch.FindConnectedMatch(blocks, x, y, visited);
 
-                // 매치 갯수가 3개 이상이라면 
+                // 블럭 개수가 3 이상이라면 추가
                 if (group.Count >= 3)
                 {
-                    if (matchManager.ProcessMatch(group))
-                    {
-                        check = true;
-                        return check;
-                    }
+                    allGroups.Add(group);
                 }
             }
-        } 
-        // 매치 갯수가 3개 미만이면 3매치도 안된다는 뜻 -> false반환 
-        return false;
+        }
+
+        // --- 모든 그룹을 대상으로 매치 판단 수행 ---
+
+        // 매치 리스트, 타입을 담을 totalMatches 튜플 리스트
+        List<(List<Block> match, MatchType type)> totalMatches = new();
+
+        foreach (List <Block> group in allGroups)
+        {
+            // ExtractAllMatches는 매치 리스트들을 반환함
+            List<(List<Block>, MatchType)> matches = matchManager.ExtractAllMatches(group);
+
+            // 모든 매치 담기
+            totalMatches.AddRange(matches);
+        }
+
+        // --- 모든 매치를 대상으로 병합 수행 ---
+
+        foreach ((List<Block> matched, MatchType type) in totalMatches)
+        {
+            matchMerger.Merge(matched, type);
+        }
+
+        return totalMatches.Count > 0;
     }
+
 }

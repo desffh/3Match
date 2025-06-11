@@ -25,11 +25,11 @@ public class FindConnectMatch
 
     public List<Block> FindConnectedMatch(Block[,] blocks, int startX, int startY, bool[,] visited)
     {
-        int targetNum = blocks[startY, startX].Num;                 // 블록의 숫자 
-        List <Block> matchList = new List<Block>();                    // 인접한 숫자 블록을 담을 List
-        Queue <Vector2Int> queue = new Queue <Vector2Int>();          // 순회 할 블럭을 담을 Queue
-        queue.Enqueue(new Vector2Int(startX, startY));              // Queue에 인자로 들어온 좌표값 추가
-        visited[startY, startX] = true;                             // 인자로 들어온 좌표값 방문체크
+        int targetNum = blocks[startY, startX].Num;                     // 블록의 숫자 
+        List <Block> matchList = new List<Block>();                     // 인접한 숫자 블록을 담을 List
+        Queue <Vector2Int> queue = new Queue <Vector2Int>();            // 순회 할 블럭을 담을 Queue
+        queue.Enqueue(new Vector2Int(startX, startY));                  // Queue에 인자로 들어온 좌표값 추가
+        visited[startY, startX] = true;                                // 인자로 들어온 좌표값 방문체크
 
         // [방향 좌표 배열 (x , y)]
         // Vector2Int.up    : (0, 1)

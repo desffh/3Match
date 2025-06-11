@@ -518,7 +518,7 @@ MonoBehaviour:
   targetWidth: 8
   targetHeight: 8
   blockDataManager: {fileID: 11400000, guid: 4f9374e84e73c054c9e3450d1fdd659f, type: 2}
-  dropDuration: 0.13
+  dropDuration: 0.15
   dataCount: 3
 --- !u!114 &610857188
 MonoBehaviour:

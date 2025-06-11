@@ -151,26 +151,26 @@ public class Board : MonoBehaviour
 
         cells[y, x] = cell;
     }
-    
+
     /// <summary>
     /// 블록 최상단 생성 & 빈자리가 없을 때 까지 생성
     /// </summary>
-    
+
     public bool FillRoutine()
     {
         bool isBlockMove = false;
 
-        // 아래에서 위로 빈 자리 찾기
-        for (int j = 1; j < Row; j++)     // 행
+        // 아래에서 위로 블럭 내리기
+        for (int j = 1; j < Row; j++) // 행
         {
             for (int i = 0; i < Col; i++) // 열
             {
                 if (blocks[j, i] == null) continue;
 
-                Block curBlock = blocks[j, i];       // 현재 블럭
-                Block belowBlock = blocks[j - 1, i]; // 아래 블럭
+                Block curBlock = blocks[j, i];
+                Block belowBlock = blocks[j - 1, i];
 
-                // 아래 블럭이 비어있다면 
+                // 아래에 블럭이 비어있다면 아래로 이동
                 if (belowBlock == null)
                 {
                     BlockChange(curBlock, i, j - 1);
@@ -179,26 +179,69 @@ public class Board : MonoBehaviour
             }
         }
 
-        dataCount = 3;
-
-        // 최상단 블럭 생성 : (Row, 0) ~ (Row, Col) 블럭 생성
-        //
-        // 데이터 주입 & 2차원 배열 좌표값에 블럭 할당
-
-        for (int i = 0; i < Col; i++) // 열
+        // 최상단 블럭 생성
+        for (int x = 0; x < Col; x++)
         {
-            if (blocks[Row - 1, i] == null) // blocks[행y][열x]
-            {
-                Vector3 pos = GetWorldPosition(i, Row - 1);
+            int y = Row - 1; // 최상단 행
 
-                BlockData blockData = BlockDataManager.blockDataList[UnityEngine.Random.Range(0, dataCount)];
-                Block block = blockCreater.SpawnBlock(pos, blockData, new Vector2Int(i, Row - 1), blockScale);
+            if (blocks[y, x] == null)
+            {
+                Vector3 pos = GetWorldPosition(x, y);
+
+                List<int> candidates = new List<int> { 1, 2, 3 };
+
+                for (int i = candidates.Count - 1; i >= 0; i--)
+                {
+                    int n = candidates[i];
+
+                    // 가로 3매치 검사
+                    bool RowMatch = (x >= 2 &&
+                        blocks[y, x - 1]?.Num == n &&
+                        blocks[y, x - 2]?.Num == n);
+
+                    // 세로 3매치 검사
+                    bool ColMatch = (
+                        blocks[y - 1, x]?.Num == n &&
+                        blocks[y - 2, x]?.Num == n);
+
+                    // 정사각형 검사 (왼쪽, 아래 같을 경우만 대각선 확인)
+                    bool SquareMatch = (x >= 1 &&
+                        blocks[y, x - 1]?.Num == n &&
+                        blocks[y - 1, x]?.Num == n &&
+                        blocks[y - 1, x - 1]?.Num == n);
+
+                    if (RowMatch || ColMatch || SquareMatch)
+                    {
+                        candidates.RemoveAt(i);
+                    }
+                }
+                
+                int number;
+
+                if (candidates.Count > 0)
+                {
+                    // 남은 후보군 중 랜덤으로 할당
+                    number = candidates[UnityEngine.Random.Range(0, candidates.Count)] - 1;
+                }
+                else
+                {
+                    number = 6;
+                }
+
+                // --- 블럭 데이터 할당 후 생성 & 애니메이션 --- 
+
+                BlockData blockData = BlockDataManager.blockDataList[number];
+
+                Block block = blockCreater.SpawnBlock(pos, blockData, new Vector2Int(x, y), blockScale);
+
                 block.Anime.MoveTo2(pos, 0.2f);
-                blocks[Row - 1, i] = block;
+                
+                blocks[y, x] = block;
 
                 isBlockMove = true;
             }
         }
+
         return isBlockMove;
     }
 
@@ -212,7 +255,7 @@ public class Board : MonoBehaviour
     /// 
     /// 새로 들어온 좌표값을 블럭에 할당 후 배열에 블럭 저장
     /// </summary>
-    
+
     void BlockChange(Block curBlock, int newX, int newY)
     {
         blocks[curBlock.BoardPos.y, curBlock.BoardPos.x] = null;

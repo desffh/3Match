@@ -18,13 +18,22 @@ public class BlockData : ScriptableObject
     [SerializeField] private Color color;
 
 
-    [Header("특수 블록 스프라이트")]
+    [Header("특수 블록 속성")]
     [SerializeField] private Sprite line4RowSprite;
     [SerializeField] private Sprite line4ColSprite;
     [SerializeField] private Sprite line5RowSprite;
     [SerializeField] private Sprite line5ColSprite;
-    [SerializeField] private Sprite tShapeSprite;
-    [SerializeField] private Sprite lShapeSprite;
+    [SerializeField] private Sprite TShapeSprite;
+    [SerializeField] private Sprite LShapeSprite;
+
+    [SerializeField] private Color line4Rowspecialcolor;
+    [SerializeField] private Color line4Colspecialcolor;
+    [SerializeField] private Color line5Rowspecialcolor;
+    [SerializeField] private Color line5Colspecialcolor;
+    [SerializeField] private Color Tspecialcolor;
+    [SerializeField] private Color Lspecialcolor;
+
+
 
     // === 프로퍼티 ===
     public BlockType Blocktype => blockType;
@@ -43,9 +52,23 @@ public class BlockData : ScriptableObject
             MatchType.Line4_Col => line4ColSprite,
             MatchType.Line5_Row => line5RowSprite,
             MatchType.Line5_Col => line5ColSprite,
-            MatchType.TShape => tShapeSprite,
-            MatchType.LShape => lShapeSprite,
+            MatchType.TShape => TShapeSprite,
+            MatchType.LShape => LShapeSprite,
             _ => defaultSprite,
+        };
+    }
+
+    public Color GetColorByMatchType(MatchType matchType)
+    {
+        return matchType switch
+        {
+            MatchType.Line4_Row => line4Rowspecialcolor,
+            MatchType.Line4_Col => line4Colspecialcolor,
+            MatchType.Line5_Row => line5Rowspecialcolor,
+            MatchType.Line5_Col => line5Colspecialcolor,
+            MatchType.TShape => Tspecialcolor,
+            MatchType.LShape => Lspecialcolor,
+            _ => Color, // 3매치일 경우 일반 색상
         };
     }
 }

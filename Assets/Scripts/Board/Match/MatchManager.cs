@@ -19,9 +19,9 @@ public class MatchManager
         matchRules = new List<IMatchRule>
         {
             // 우선순위 순 (7 6 5 4 3)
-            new TShapeMatchRule(7),   // T 매치
-            new LShapeMatchRule(6),   // L 매치
-            new LineMatchRule(5, 5),  // 5 매치
+            new LineMatchRule(5, 7),  // 5 매치
+            new TShapeMatchRule(6),   // T 매치
+            new LShapeMatchRule(5),   // L 매치
             new LineMatchRule(4, 4),  // 4 매치
             new LineMatchRule(3, 3),  // 3 매치
         };
@@ -36,21 +36,48 @@ public class MatchManager
     /// 매치된 블럭 리스트를 가져온 후 병합 호출
     /// </summary>
 
-    public bool ProcessMatch(List<Block> group)
+    public List<(List<Block>, MatchType)> ExtractAllMatches(List<Block> group)
     {
-        // 우선순위를 내림차순으로 정렬 (7 6 5 4 3)
+        // 매치 리스트를 담을 results 리스트
+        List<(List<Block>, MatchType)> results = new();
+
+        // 사용된 블럭의 좌표값들 
+        HashSet<Vector2Int> used = new();
+
         foreach (IMatchRule rule in matchRules.OrderByDescending(r => r.priority))
         {
-            // 매치된 블럭 반환 -> 매치된 게 없으면 matched == null
-            List <Block> matched = rule.ExtractMatchBlocks(group);
-
-            if (matched != null)
+            // 그룹안의 모든 매치가 이루어질 때 까지 수행
+            while (true)
             {
-                // 병합할 블럭 리스트를 인자로 넘김
-                return matchMerger.Merge(matched, rule.matchType);
-            } 
+                // 이미 사용된 블록 좌표라면 제외 
+                List<Block> filtered = group.Where(b => !used.Contains(b.BoardPos)).ToList();
+                
+                // 사용되지 않은 블럭들의 수가 최소(3) 미만이라면 break
+                if (filtered.Count < 3)
+                {
+                    break;
+                }
+
+                List<Block> match = rule.ExtractMatchBlocks(filtered);
+
+                if (match != null)
+                {
+                    results.Add((match, rule.matchType));
+
+                    // 매치된 블럭들의 좌표 저장
+                    foreach (Block b in match)
+                    {
+                        used.Add(b.BoardPos);
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
-        // 매치 없음 -> 블럭이 3개면서 L자 모양
-        return false;
+
+        return results;
     }
+
 }
