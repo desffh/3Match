@@ -18,10 +18,10 @@ MonoBehaviour:
   color: {r: 0.027450982, g: 0.2784314, b: 0.6, a: 1}
   line4RowSprite: {fileID: 21300000, guid: f20bc415b10a14643a5cd5890381db2b, type: 3}
   line4ColSprite: {fileID: 21300000, guid: f20bc415b10a14643a5cd5890381db2b, type: 3}
-  line5RowSprite: {fileID: 21300000, guid: f20bc415b10a14643a5cd5890381db2b, type: 3}
-  line5ColSprite: {fileID: 21300000, guid: f20bc415b10a14643a5cd5890381db2b, type: 3}
-  TShapeSprite: {fileID: 21300000, guid: afa6ae9c0572b9749b40f9def81c5ebc, type: 3}
-  LShapeSprite: {fileID: 21300000, guid: afa6ae9c0572b9749b40f9def81c5ebc, type: 3}
+  line5RowSprite: {fileID: 21300000, guid: afa6ae9c0572b9749b40f9def81c5ebc, type: 3}
+  line5ColSprite: {fileID: 21300000, guid: afa6ae9c0572b9749b40f9def81c5ebc, type: 3}
+  TShapeSprite: {fileID: 21300000, guid: 60c6bff5ba552db42abe99a4d409bb4e, type: 3}
+  LShapeSprite: {fileID: 21300000, guid: 60c6bff5ba552db42abe99a4d409bb4e, type: 3}
   line4Rowspecialcolor: {r: 1, g: 0.5529412, b: 0, a: 1}
   line4Colspecialcolor: {r: 1, g: 0.5529412, b: 0, a: 1}
   line5Rowspecialcolor: {r: 0.8666667, g: 0, b: 1, a: 1}

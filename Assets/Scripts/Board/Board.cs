@@ -47,9 +47,6 @@ public class Board : MonoBehaviour
     public static event Action FirstOnmatchFind;
 
 
-    private List<BlockData> blockDatas = new List<BlockData>();
-
-
     [SerializeField] int dataCount;
 
     private BlockSwap blockSwap;
@@ -104,9 +101,7 @@ public class Board : MonoBehaviour
     /// </summary>
 
     public void SpawnBoard(CellData cellData, List<BlockData> blockDataList)
-    {
-        blockDatas = blockDataList;
-
+    { 
         for (int y = 0; y < row; y++)
         {
             for (int x = 0; x < col; x++)
@@ -156,6 +151,7 @@ public class Board : MonoBehaviour
     /// 블록 최상단 생성 & 빈자리가 없을 때 까지 생성
     /// </summary>
 
+    // 블록 최상단 한 줄 생성. 매칭이 되지 않도록 검사
     public bool FillRoutine()
     {
         bool isBlockMove = false;
@@ -215,29 +211,24 @@ public class Board : MonoBehaviour
                         candidates.RemoveAt(i);
                     }
                 }
-                
+
                 int number;
 
                 if (candidates.Count > 0)
                 {
                     // 남은 후보군 중 랜덤으로 할당
-                    number = candidates[UnityEngine.Random.Range(0, candidates.Count)] - 1;
+                    number = candidates[UnityEngine.Random.Range(0, candidates.Count)];
                 }
                 else
                 {
                     number = 6;
                 }
 
-                // --- 블럭 데이터 할당 후 생성 & 애니메이션 --- 
-
-                BlockData blockData = BlockDataManager.blockDataList[number];
-
+                // 블럭 데이터 할당 후 생성 & 애니메이션
+                BlockData blockData = BlockDataManager.Get(number);
                 Block block = blockCreater.SpawnBlock(pos, blockData, new Vector2Int(x, y), blockScale);
-
                 block.Anime.MoveTo2(pos, 0.2f);
-                
                 blocks[y, x] = block;
-
                 isBlockMove = true;
             }
         }
