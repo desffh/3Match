@@ -9,18 +9,20 @@ using UnityEngine;
 
 public class BlockInput : MonoBehaviour
 {
-    public static event Action<Block, Block> OnSwapRequest;
-
+    [Header("클릭된 블럭 목록")]
     [SerializeField] private Block firstBlock;
     [SerializeField] private Block secondBlock;
 
-    [SerializeField] private Board board;
+    private Board board;
+
+    // Swap 호출 이벤트 -> Board.cs의 TrySwap이 구독중
+    public static event Action<Block, Block> OnSwapRequest;
+
 
     private void Awake()
     {
         board = GetComponentInParent<Board>();
     }
-
 
     void Update()
     {
@@ -53,9 +55,10 @@ public class BlockInput : MonoBehaviour
     }
 
     /// <summary>
-    /// 누른 블럭의 컴포넌트 반환 
+    /// 누른 컴포넌트 반환
     /// </summary>
-
+    /// <param name="screenPos"></param>
+    /// <returns></returns>
     private Block GetBlockUnderTouch(Vector2 screenPos)
     {
         Vector3 world = Camera.main.ScreenToWorldPoint(screenPos);
@@ -68,6 +71,9 @@ public class BlockInput : MonoBehaviour
     /// <summary>
     /// 선택된 두 블럭이 인접한 지 확인
     /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
     
     private bool IsAdjacent(Vector2Int a, Vector2Int b)
     {

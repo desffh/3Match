@@ -12,35 +12,36 @@ public class BlockSwap
 {
     private Board board;
 
-    Block[,] blocks;
+    Block[,] blocks;      // board에 저장된 블럭들의 2차원 배열
 
     // 생성자 주입
     public BlockSwap(Board board, Block[,] blocks)
     {
         this.board = board;
-
         this.blocks = blocks;
     }
 
+
     /// <summary>
-    /// 선택된 블럭a와 블럭b의 2차원 배열의 좌표값 스왑
-    /// 
-    /// 서로의 월드 좌표끼리 위치 스왑 (Anime.MoveTo 두트윈 호출)
+    /// 선택된 블럭끼리  2차원 배열의 좌표값, 월드 좌표 Swap 
     /// </summary>
-    
+    /// <param name="a">          선택된 블럭 a                                    </param>
+    /// <param name="b">          선택된 블럭 b                                    </param>
+    /// <param name="onComplete"> 스왑이 끝나고 호출될 이벤트 -> OnMatchFind 호출   </param>
     public void TrySwap(Block a, Block b, Action onComplete = null)
     {
         Vector2Int posA = a.BoardPos;
         Vector2Int posB = b.BoardPos;
 
-        blocks[posA.y, posA.x] = b;
+        blocks[posA.y, posA.x] = b;    // 2차원 배열 좌표값 Swap
         blocks[posB.y, posB.x] = a;
 
-        a.SetBoardPos(posB.x, posB.y);
+        a.SetBoardPos(posB.x, posB.y); // 블럭 소유 Vector2Int 좌표값 Swap 
         b.SetBoardPos(posA.x, posA.y);
 
-        Tween tweenA = a.Anime.MoveTo(board.GetWorldPosition(posB.x, posB.y));
-        Tween tweenB = b.Anime.MoveTo(board.GetWorldPosition(posA.x, posA.y));
+        //월드 좌표 Swap (Dotween Animation 사용)
+        Tween tweenA = a.Anime.MoveTo(board.GetWorldPosition(posB.x, posB.y), Ease.OutQuart);
+        Tween tweenB = b.Anime.MoveTo(board.GetWorldPosition(posA.x, posA.y), Ease.OutQuart);
 
         DOTween.Sequence()
             .Append(tweenA)

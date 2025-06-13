@@ -11,8 +11,6 @@ public class MatchManager
 {
     private List<IMatchRule> matchRules;
 
-    private MatchMerger matchMerger;
-
     // 생성자
     public MatchManager(MatchMerger matchMerger)
     {
@@ -25,8 +23,6 @@ public class MatchManager
             new LineMatchRule(4, 4),  // 4 매치
             new LineMatchRule(3, 3),  // 3 매치
         };
-
-        this.matchMerger = matchMerger;
     }
 
     /// <summary>

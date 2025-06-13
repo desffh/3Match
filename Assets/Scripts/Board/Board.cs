@@ -3,61 +3,64 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class Board : MonoBehaviour
 {
-    [SerializeField] private GameObject cellPrefab;
-
     [Header("셀 간 거리 및 시작 위치")]
-    [SerializeField] private float BaseCellSpacing = 1.5f;
-    [SerializeField] private Vector2 boardOrigin;
+    [SerializeField] private Vector2 boardOrigin;          // 그리드 시작 위치
+    private float cellSpacing;
+    [SerializeField] private float dropDuration = 0.3f;    // 떨어지는 속도 간격
+    [SerializeField] private Vector3 blockScale;           // 블록 크기
+    public Vector3 BlockScale => blockScale;
 
-    [Header("기본 크기")]
-    [SerializeField] private Vector3 baseBlockScale = new Vector3(0.8f, 0.8f, 0.8f);
 
-    [Header("지정 크기")]
+    [Header("기본 블럭 크기")]
+    private Vector3 baseBlockScale = new Vector3(0.8f, 0.8f, 0.8f);
+
+
+    [Header("지정 보드 크기")]
     [SerializeField] private float targetWidth = 8f;
     [SerializeField] private float targetHeight = 8f;
 
+
+    [Header("가져와서 사용하기 (컴포넌트)")]
     [SerializeField] private BlockDataManager blockDataManager;
+    private BlockCreater blockCreater;
+    private CellCreater cellCreater;
+    public BlockCreater BlockCreater => blockCreater;
+    public CellCreater CellCreater => cellCreater;
     public BlockDataManager BlockDataManager => blockDataManager;
 
-    private BlockCreater blockCreater;
 
+    [Header("스테이지에 따른 행 열")]
     private int row;
     private int col;
-
-    private Cell[,] cells;
-    private Block[,] blocks;
-
-    private float cellSpacing;
-    private Vector3 blockScale;
-
-    public float dropDuration = 0.3f;
-
-    public Vector3 BlockScale => blockScale;
-    public Cell[,] Cells => cells;
-    public Block[,] Blocks => blocks;
     public int Row => row;
     public int Col => col;
 
-    public static event Action OnmatchFind;
 
-    public static event Action FirstOnmatchFind;
+    [Header("2차원 배열")]
+    private Cell[,] cells;
+    private Block[,] blocks;
+    public Cell[,] Cells => cells;
+    public Block[,] Blocks => blocks;
 
 
-    [SerializeField] int dataCount;
 
+
+
+    [Header("일반 C# 클래스")]
     private BlockSwap blockSwap;
+    private BlockSpawner blockSpawner;
+    private BlocksBelow blocksBelow;
 
+
+    public static event Action OnmatchFind;
 
     private void Awake()
     {
         blockCreater = GetComponent<BlockCreater>();
-
-        dataCount = BlockDataManager.blockDataList.Count;
-
+        cellCreater = GetComponent<CellCreater>();
     }
 
     private void OnEnable()
@@ -80,7 +83,6 @@ public class Board : MonoBehaviour
     /// 스테이지 데이터 세팅 
     /// 1. row행 / col열 2. 그리드 크리 할당 3. BlockCreater 오브젝트 풀 초기화
     /// </summary>
-
     public void Init(int nRow, int nCol)
     {
         row = nRow;
@@ -92,14 +94,38 @@ public class Board : MonoBehaviour
         blockCreater.Init();
         CalculateLayout();
 
+
+        BoardContext context = new BoardContext
+        {
+            Blocks = blocks,
+            GetWorldPosition = GetWorldPosition,
+            col = col,
+            row = row,
+        };
+
         // 생성자 주입 
         blockSwap = new BlockSwap(this, Blocks);
+        blockSpawner = new BlockSpawner(context, BlockCreater, BlockDataManager, BlockScale);
+        blocksBelow = new BlocksBelow(context);
     }
+
+
+    /// <summary>
+    /// 셀 동적 생성 & 2차원 배열에 할당
+    /// </summary>
+    private void CreateCell(int x, int y, CellData cellData)
+    {
+        Vector3 pos = GetWorldPosition(x, y);
+
+        Cell cell = CellCreater.SpawnCell(pos, cellData, BlockScale);
+
+        cells[y, x] = cell;
+    }
+
 
     /// <summary>
     /// 보드 생성 - 셀 생성 호출 & 블록 생성 이벤트 호출
     /// </summary>
-
     public void SpawnBoard(CellData cellData, List<BlockData> blockDataList)
     { 
         for (int y = 0; y < row; y++)
@@ -109,156 +135,42 @@ public class Board : MonoBehaviour
                 CreateCell(x, y, cellData);
             }
         }
-
-        FirstOnmatchFind.Invoke();
-
+        OnmatchFind.Invoke();
     }
 
     /// <summary>
     /// 코루틴으로 FillRoutine() 호출 
     /// </summary>
-    /// <returns></returns>
-
-    public IEnumerator FillUntilStable()
+    public IEnumerator FillBlocks()
     {
         bool filled;
 
         do
         {
-            filled = FillRoutine();
+            filled = FillRoutine(); // 블럭이 내려가거나 생성되면 true
             yield return new WaitForSeconds(dropDuration);
-        } 
-        while (filled); // filled == true라면 실행
+        }
+        while (filled); // true면 계속 반복
     }
 
-    /// <summary>
-    /// 셀 동적 생성 & 2차원 배열에 할당
-    /// </summary>
-
-    private void CreateCell(int x, int y, CellData cellData)
-    {
-        Vector3 pos = GetWorldPosition(x, y);
-        GameObject cellObj = Instantiate(cellPrefab, pos, Quaternion.identity, transform);
-        cellObj.transform.localScale = blockScale;
-
-        Cell cell = cellObj.GetComponent<Cell>();
-        cell.Init(cellData);
-
-        cells[y, x] = cell;
-    }
 
     /// <summary>
-    /// 블록 최상단 생성 & 빈자리가 없을 때 까지 생성
+    /// 블록 생성 & 블록 아래로 내리기 루틴 / DropBlocks(), TrySpawnBlocks(), GetValidBlockNumber()
     /// </summary>
-
-    // 블록 최상단 한 줄 생성. 매칭이 되지 않도록 검사
     public bool FillRoutine()
     {
-        bool isBlockMove = false;
+        bool isBlockMoved = false;
 
-        // 아래에서 위로 블럭 내리기
-        for (int j = 1; j < Row; j++) // 행
-        {
-            for (int i = 0; i < Col; i++) // 열
-            {
-                if (blocks[j, i] == null) continue;
+        if (blocksBelow.DropBlocks()) isBlockMoved = true;
+        if (blockSpawner.TrySpawnTopBlocks()) isBlockMoved = true;
 
-                Block curBlock = blocks[j, i];
-                Block belowBlock = blocks[j - 1, i];
-
-                // 아래에 블럭이 비어있다면 아래로 이동
-                if (belowBlock == null)
-                {
-                    BlockChange(curBlock, i, j - 1);
-                    isBlockMove = true;
-                }
-            }
-        }
-
-        // 최상단 블럭 생성
-        for (int x = 0; x < Col; x++)
-        {
-            int y = Row - 1; // 최상단 행
-
-            if (blocks[y, x] == null)
-            {
-                Vector3 pos = GetWorldPosition(x, y);
-
-                List<int> candidates = new List<int> { 1, 2, 3 };
-
-                for (int i = candidates.Count - 1; i >= 0; i--)
-                {
-                    int n = candidates[i];
-
-                    // 가로 3매치 검사
-                    bool RowMatch = (x >= 2 &&
-                        blocks[y, x - 1]?.Num == n &&
-                        blocks[y, x - 2]?.Num == n);
-
-                    // 세로 3매치 검사
-                    bool ColMatch = (
-                        blocks[y - 1, x]?.Num == n &&
-                        blocks[y - 2, x]?.Num == n);
-
-                    // 정사각형 검사 (왼쪽, 아래 같을 경우만 대각선 확인)
-                    bool SquareMatch = (x >= 1 &&
-                        blocks[y, x - 1]?.Num == n &&
-                        blocks[y - 1, x]?.Num == n &&
-                        blocks[y - 1, x - 1]?.Num == n);
-
-                    if (RowMatch || ColMatch || SquareMatch)
-                    {
-                        candidates.RemoveAt(i);
-                    }
-                }
-
-                int number;
-
-                if (candidates.Count > 0)
-                {
-                    // 남은 후보군 중 랜덤으로 할당
-                    number = candidates[UnityEngine.Random.Range(0, candidates.Count)];
-                }
-                else
-                {
-                    number = 6;
-                }
-
-                // 블럭 데이터 할당 후 생성 & 애니메이션
-                BlockData blockData = BlockDataManager.Get(number);
-                Block block = blockCreater.SpawnBlock(pos, blockData, new Vector2Int(x, y), blockScale);
-                block.Anime.MoveTo2(pos, 0.2f);
-                blocks[y, x] = block;
-                isBlockMove = true;
-            }
-        }
-
-        return isBlockMove;
+        return isBlockMoved;
     }
 
-
-    /// <summary>
-    /// 퍼즐 이동 후 2차원 배열 x, y 좌표값 변경
-    /// 
-    /// 이전 좌표값 null
-    /// 
-    /// 새로운 좌표로 이동 (world Position)
-    /// 
-    /// 새로 들어온 좌표값을 블럭에 할당 후 배열에 블럭 저장
-    /// </summary>
-
-    void BlockChange(Block curBlock, int newX, int newY)
-    {
-        blocks[curBlock.BoardPos.y, curBlock.BoardPos.x] = null;
-        curBlock.SetBoardPos(newX, newY);// 좌표 설정 2차원 좌표 (x, y)
-        curBlock.Anime.MoveTo2(GetWorldPosition(newX, newY), 0.1f);
-        blocks[newY, newX] = curBlock;   // 좌표 설정 2차원 배열 blocks[y][x] == blocks[행][열]
-    }
 
     /// <summary>
     /// 블록이 삭제될 때 호출 -> 오브젝트 풀 반환 & 2차원 배열 초기화
     /// </summary>
-
     public void RemoveBlock(Block block)
     {
         if (block == null) return;
@@ -270,9 +182,10 @@ public class Board : MonoBehaviour
     /// <summary>
     /// 그리드 행열 크기 계산 & 간격, 블럭 크기 계산
     /// </summary>
-
     private void CalculateLayout()
     {
+        float BaseCellSpacing = 1.5f; // 블럭 간 간격
+        
         float rawWidth = col * BaseCellSpacing;
         float rawHeight = row * BaseCellSpacing;
 
@@ -292,7 +205,6 @@ public class Board : MonoBehaviour
     /// <summary>
     /// 2차원 배열 좌표에 해당하는 블럭 생성 지점 반환 (World Position) 
     /// </summary>
-
     public Vector3 GetWorldPosition(int x, int y)
     {
         return new Vector3(x * cellSpacing, y * cellSpacing, 0) + (Vector3)boardOrigin;
@@ -302,7 +214,6 @@ public class Board : MonoBehaviour
     /// <summary>
     /// 스왑 애니메이션이 모두 끝나고 매치 이벤트 호출
     ///</summary>
-
     public void TrySwap(Block a, Block b)
     {
         blockSwap.TrySwap(a, b, () =>

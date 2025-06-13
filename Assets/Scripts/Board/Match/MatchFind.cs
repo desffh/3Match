@@ -35,13 +35,11 @@ public class MatchFind : MonoBehaviour
     private void OnEnable()
     {
         Board.OnmatchFind += HandleOnMatchFind;
-        Board.FirstOnmatchFind += FirstHandleOnMatchFind;
     }
 
     private void OnDisable()
     {
         Board.OnmatchFind -= HandleOnMatchFind;
-        Board.FirstOnmatchFind -= FirstHandleOnMatchFind;
 
     }
 
@@ -49,33 +47,10 @@ public class MatchFind : MonoBehaviour
     {
         StartCoroutine(MatchLoop());
     }
-    private void FirstHandleOnMatchFind()
-    {
-        StartCoroutine(SpawnAndMatchLoop());
-    }
+
 
     /// <summary>
-    /// 첫 시작 시 블럭 생성 & 매치 확인
-    /// </summary>
-    /// <returns></returns>
-
-    private IEnumerator SpawnAndMatchLoop()
-    {
-        bool matched;
-
-        do
-        {
-            yield return board.StartCoroutine(board.FillUntilStable());
-            yield return new WaitForSeconds(0.1f);
-
-            matched = CheckAllMatches();
-            yield return new WaitForSeconds(0.2f);
-        } 
-        while (matched);
-    }
-
-    /// <summary>
-    /// 스왑 후 매치 확인 & 블럭 생성
+    /// 매치 확인 & 블럭 생성
     /// </summary>
     
     private IEnumerator MatchLoop()
@@ -85,9 +60,13 @@ public class MatchFind : MonoBehaviour
         do
         {
             matched = CheckAllMatches();
-            yield return new WaitForSeconds(0.2f);
+            
+            if(matched)
+            {
+                yield return new WaitForSeconds(0.2f);
+            }
 
-            yield return board.StartCoroutine(board.FillUntilStable());
+            yield return board.StartCoroutine(board.FillBlocks());
             yield return new WaitForSeconds(0.1f);
 
         } while (matched);

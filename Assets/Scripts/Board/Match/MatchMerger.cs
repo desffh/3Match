@@ -56,11 +56,11 @@ public class MatchMerger
         {
             if (block != center)
             {
-                block.Anime.MergeToAndPop(center.transform.position, board.BlockScale, 
+                block.Anime.MergeToBlockAnime(center.transform.position, board.BlockScale, 
                     () => { board.RemoveBlock(block); });
 
                 // 나머지 블록이 모두 제거된 뒤 병합되도록 수정
-                center.Anime.ResetScale(board.BlockScale);
+                center.Anime.CreateBlockAnime(board.BlockScale);
             }
         }
 

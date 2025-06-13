@@ -13,12 +13,12 @@ public class BlockData : ScriptableObject
 {
     [Header("기본 속성")]
     [SerializeField] private BlockType blockType;
-    [SerializeField] private int num;
     [SerializeField] private Sprite defaultSprite;
     [SerializeField] private Color color;
+    [SerializeField] private int num;
 
 
-    [Header("특수 블록 속성")]
+    [Header("특수 블록 속성 스프라이트")]
     [SerializeField] private Sprite line4RowSprite;
     [SerializeField] private Sprite line4ColSprite;
     [SerializeField] private Sprite line5RowSprite;
@@ -26,13 +26,13 @@ public class BlockData : ScriptableObject
     [SerializeField] private Sprite TShapeSprite;
     [SerializeField] private Sprite LShapeSprite;
 
+    [Header("특수 블록 속성 색상")]
     [SerializeField] private Color line4Rowspecialcolor;
     [SerializeField] private Color line4Colspecialcolor;
     [SerializeField] private Color line5Rowspecialcolor;
     [SerializeField] private Color line5Colspecialcolor;
     [SerializeField] private Color Tspecialcolor;
     [SerializeField] private Color Lspecialcolor;
-
 
 
     // === 프로퍼티 ===
@@ -44,6 +44,8 @@ public class BlockData : ScriptableObject
     /// <summary>
     /// 매치 타입에 따라 해당하는 스프라이트 반환
     /// </summary>
+    /// <param name="matchType"> 병합된 타입              </param>
+    /// <returns>                특수 블럭 Sprite         </returns>
     public Sprite GetSpriteByMatchType(MatchType matchType)
     {
         return matchType switch
@@ -58,6 +60,12 @@ public class BlockData : ScriptableObject
         };
     }
 
+
+    /// <summary>
+    /// 매치 타입에 따라 해당하는 색상 반환
+    /// </summary>
+    /// <param name="matchType"> 병합된 타입      </param>
+    /// <returns>                특수 블럭 Color  </returns>
     public Color GetColorByMatchType(MatchType matchType)
     {
         return matchType switch
